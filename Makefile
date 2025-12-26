@@ -71,7 +71,7 @@ export PATH := $(BASE_DIR)/$(TOOLS_DIR):$(GO_EXE_PATH):$(PATH)
 
 # Default values for dev cluster
 ifeq ($(K8S_VERSION),)
-K8S_VERSION := v1.33.1
+K8S_VERSION :=$(shell go list -m 'k8s.io/kubernetes' | cut -d' ' -f 2)
 endif
 ifeq ($(CLUSTER_NAME),)
 CLUSTER_NAME := yk8s
@@ -91,7 +91,7 @@ else
 endif
 
 # Release build requires using parent dir as base for buildroot
-RELEASE_BUILD := $(test -f "$(BASE_DIR)/.gitignore" ; echo $$?)
+RELEASE_BUILD := $(shell test -f "$(BASE_DIR)/.gitignore" ; echo $$?)
 ifeq ($(RELEASE_BUILD),1)
 	DOCKER_BUILDROOT := $(shell cd "$(BASE_DIR)/.." ; pwd)
 	DOCKER_SRCROOT := /buildroot/k8shim
@@ -171,7 +171,7 @@ GOLANGCI_LINT_ARCHIVEBASE=golangci-lint-$(GOLANGCI_LINT_VERSION)-$(OS)-$(EXEC_AR
 export PATH := $(BASE_DIR)/$(GOLANGCI_LINT_PATH):$(PATH)
 
 # kubectl
-KUBECTL_VERSION=v1.27.7
+KUBECTL_VERSION=$(shell go list -m 'k8s.io/kubernetes' | cut -d' ' -f 2)
 KUBECTL_PATH=$(TOOLS_DIR)/kubectl-$(KUBECTL_VERSION)
 KUBECTL_BIN=$(KUBECTL_PATH)/kubectl
 export PATH := $(BASE_DIR)/$(KUBECTL_PATH):$(PATH)
@@ -204,7 +204,7 @@ GO_LICENSES_BIN=$(GO_LICENSES_PATH)/go-licenses
 export PATH := $(BASE_DIR)/$(GO_LICENSES_PATH):$(PATH)
 
 # ginkgo
-GINKGO_VERSION=v2.21.0
+GINKGO_VERSION=$(shell go list -m 'github.com/onsi/ginkgo/v2' | cut -d' ' -f 2)
 GINKGO_PATH=$(TOOLS_DIR)/ginkgo-$(GINKGO_VERSION)
 GINKGO_BIN=$(GINKGO_PATH)/ginkgo
 export PATH := $(BASE_DIR)/$(GINKGO_PATH):$(PATH)
@@ -289,7 +289,7 @@ $(KUBECTL_BIN):
 	@echo "installing kubectl $(KUBECTL_VERSION)"
 	@mkdir -p "$(KUBECTL_PATH)"
 	@curl -sSfL -o "$(KUBECTL_BIN)" \
-		"https://storage.googleapis.com/kubernetes-release/release/$(KUBECTL_VERSION)/bin/$(OS)/$(EXEC_ARCH)/kubectl" && \
+		"https://dl.k8s.io/release/$(KUBECTL_VERSION)/bin/$(OS)/$(EXEC_ARCH)/kubectl" && \
 		chmod +x "$(KUBECTL_BIN)"
 
 # Install kind
